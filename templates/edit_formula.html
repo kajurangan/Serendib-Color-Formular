@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Formula - Serendib Color Formular</title>
+    <!-- Bootstrap 4.5 CDN -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header button {
+            margin: 5px;
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        th, td {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+        }
+
+        .input-sm {
+            width: 100px;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 16px;
+            height: 16px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center mb-4">Edit Formula</h2>
+
+        <!-- Form Section -->
+         <!-- Form Section -->
+        <form id="formula-form" method="POST" action="/save">
+            <!-- Hidden field for formula ID (will be None for new entries) -->
+            <input type="hidden" name="formula_id" value="{{ formula_id }}">
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="customer" class="form-label">Customer</label>
+                    <input type="text" class="form-control" id="customer" name="customer" value="{{ customer }}" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="code" class="form-label">Code</label>
+                    <input type="text" class="form-control" id="code" name="code" value="{{ code }}" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="color-name" class="form-label">Color Name</label>
+                    <input type="text" class="form-control" id="color-name" name="color-name" value="{{ color_name }}" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="product" class="form-label">Product</label>
+                    <input type="text" class="form-control" id="product" name="product" value="{{ product }}" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="base" class="form-label">Base</label>
+                    <select class="form-control" id="base" name="base" required>
+                        <option value="CLEAR" {% if base == 'CLEAR' %}selected{% endif %}>CLEAR</option>
+                        <option value="WHITE" {% if base == 'WHITE' %}selected{% endif %}>WHITE</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="can-size" class="form-label">Can Size</label>
+                    <select class="form-control" id="can-size" name="can-size" required>
+                        <option value="1" {% if can_size == '1' %}selected{% endif %}>1</option>
+                        <option value="4" {% if can_size == '4' %}selected{% endif %}>4</option>
+                        <option value="5" {% if can_size == '5' %}selected{% endif %}>5</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-container">
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Color</th>
+                <th>GR</th>
+                <th>SG</th>
+                <th>ML</th>
+                <th>DP/OZ</th>
+                <th>Rounded</th>
+            </tr>
+        </thead>
+        <tbody>
+    {% for color in ["TW", "LB", "BU", "MYX", "OY", "QR", "SPARE", "YOX", "QV", "UO", "PB", "PG", "ROX"] %}
+    <tr>
+        <td style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: inline-block; width: 60px; height: 20px; background-color: 
+            {% if color == 'TW' %}rgb(255,255,255)
+            {% elif color == 'LB' %}rgb(0,0,0)
+            {% elif color == 'BU' %}rgb(102,51,0)
+            {% elif color == 'MYX' %}rgb(255,255,51)
+            {% elif color == 'OY' %}rgb(255,255,153)
+            {% elif color == 'QR' %}rgb(255,0,0)
+            {% elif color == 'SPARE' %}rgb(255,255,255)
+            {% elif color == 'YOX' %}rgb(215,165,32)
+            {% elif color == 'QV' %}rgb(153,0,153)
+            {% elif color == 'UO' %}rgb(255,128,0)
+            {% elif color == 'PB' %}rgb(0,0,153)
+            {% elif color == 'PG' %}rgb(0,51,0)
+            {% elif color == 'ROX' %}rgb(153,0,0)
+            {% endif %}; margin-right: 10px;"></div> 
+            <span style="flex-grow: 1; text-align: right; padding-left: 10px;">{{ color }}</span>
+        </td>
+        <!-- We check if there's a row for this color in table_data, and if so, pre-fill the data -->
+        {% set row = table_data | selectattr('color', 'equalto', color) | first %}
+        <td><input type="number" class="form-control input-sm" name="gr[]" step="0.01" value="{{ row.gr if row else '' }}"></td>
+        <td><input type="number" class="form-control input-sm" name="sg[]" step="0.01" value="{{ row.sg if row else '' }}"></td>
+        <td><input type="number" class="form-control input-sm" name="ml[]" step="0.01" value="{{ row.ml if row else '' }}"></td>
+        <td><input type="text" class="form-control input-sm" name="dp_oz[]" value="{{ row.dp_oz if row else '' }}"></td>
+        <td><input type="number" class="form-control input-sm" name="rounded[]" step="0.01" value="{{ row.rounded if row else '' }}"></td>
+    </tr>
+    {% endfor %}
+</tbody>
+
+    </table>
+</div>
+
+
+            <div class="header mb-4">
+                <button type="submit" class="btn btn-success" id="save-button">
+                    Save
+                </button>
+                <a href="{{ url_for('home') }}" class="btn btn-dark">Close</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bootstrap 4.5 JS (optional) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- AJAX Script for handling form submission -->
+    <script>
+        document.getElementById('formula-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const saveButton = document.getElementById('save-button');
+            const formData = new FormData(this); // Gather form data
+
+            // Replace the Save button text with a loader
+            saveButton.innerHTML = '<div class="loader"></div>';
+
+            // Send the AJAX request
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/save', true);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    saveButton.innerHTML = 'Save'; // Reset button text after save
+                    window.location.href = '/';
+                } else {
+                    alert('Error saving the formula');
+                    saveButton.innerHTML = 'Save'; // Reset button text if error occurs
+                }
+            };
+            xhr.send(formData);
+        });
+    </script>
+    <script src="../static/js/keep_alive.js"></script>
+</body>
+</html>

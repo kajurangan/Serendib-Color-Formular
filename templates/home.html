@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Formulas - Serendib Color Formular</title>
+    <!-- Bootstrap 4.5 CDN -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body, html {
+            height: 100%;
+        }
+        .bg {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .center-container {
+            text-align: center;
+            width: 100%;
+        }
+        .search-bar {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            position: relative;
+        }
+        .search-results {
+            position: absolute;
+            width: 100%;
+            background: white;
+            border: 1px solid #ccc;
+            z-index: 1000;
+        }
+        .search-results ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .search-results ul li {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            cursor: pointer;
+        }
+        .search-results ul li:hover {
+            background-color: #f0f0f0;
+        }
+        .company-name {
+    font-size: 48px; /* You can adjust the size */
+    font-weight: bold;
+    text-align: center;
+    background: linear-gradient(to right, #FF0000, #FF6347, #FF4500, #DC143C, #B22222); /* Different red shades */
+    -webkit-background-clip: text;
+    color: transparent; /* This allows the gradient to show inside the text */
+    animation: red-gradient-text 5s ease-in-out infinite;
+}
+
+/* Optional animation for a subtle effect */
+@keyframes rainbow-text {
+    0% {
+        background-position: 0%;
+    }
+    100% {
+        background-position: 100%;
+    }
+}
+    </style>
+</head>
+<body>
+
+    <div class="bg">
+        <div class="center-container">
+            <h1 class="company-name">Serendib Paints & Decor - Benjamin Moore Paints</h1>
+            <h1>Search Formulas</h1>
+            <div class="search-bar">
+                <input type="text" id="search-input" class="form-control" placeholder="Type to search...">
+                <div class="search-results" id="search-results" style="display: none;">
+                    <ul id="results-list"></ul>
+                </div>
+            </div>
+            <div class="mt-4">
+                <!-- New Button -->
+                <a href="/new" class="btn btn-primary btn-lg">New</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 4.5 JS (optional) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- AJAX Script for handling search -->
+    <script>
+        document.getElementById('search-input').addEventListener('input', function() {
+            const query = this.value;
+
+            if (query.length > 0) {
+                // Send AJAX request to Flask app
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', `/search?q=${query}`, true);
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        const results = JSON.parse(xhr.responseText);
+                        const resultsList = document.getElementById('results-list');
+                        resultsList.innerHTML = '';  // Clear previous results
+
+                        if (results.length > 0) {
+                            results.forEach(function(item) {
+                                const li = document.createElement('li');
+                                li.textContent = `${item[1]} | ${item[2]} | ${item[3]} | ${item[4]} | ${item[5]} | ${item[6]}`;
+                                li.addEventListener('click', function() {
+                                    // Redirect to the edit page when a result is clicked
+                                    window.location.href = `/edit_formula/${item[0]}`;
+                                });
+                                resultsList.appendChild(li);
+                            });
+                            document.getElementById('search-results').style.display = 'block';
+                        } else {
+                            document.getElementById('search-results').style.display = 'none';
+                        }
+                    }
+                };
+                xhr.send();
+            } else {
+                // Hide results if the input is empty
+                document.getElementById('search-results').style.display = 'none';
+            }
+        });
+    </script>
+    <script src="../static/js/keep_alive.js"></script>
+</body>
+</html>
